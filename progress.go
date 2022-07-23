@@ -44,6 +44,7 @@ func NewBar(total int64) *Bar {
 		done:           make(chan struct{}),
 	}
 	go b.listenRate()
+	fmt.Print("\r\n")
 	b.template(`{{.Prefix}} {{.Name}} {{.Percent | printf "%3.0f"}}% {{.Bar}} {{.Total}} {{.Rate}} {{.Text}}`)
 
 	return b
@@ -57,11 +58,11 @@ func (b *Bar) listenRate() {
 		select {
 		case <-tick.C:
 			r := b.current - b.prev
-			b.rate = "[" + b.bytesToSize(r*10) + "/s]  "
+			b.rate = "[" + b.bytesToSize(r*10) + "/s]"
 			b.rate = SetColor(b.rate, 0, 0, yellow)
 			b.prev = b.current
 		case <-b.done:
-			fmt.Println()
+			fmt.Print("\r\n")
 			return
 		}
 	}
@@ -124,6 +125,7 @@ func (b *Bar) Add(n int64) {
 	}
 	if b.current == b.total {
 		b.Prefix = "Success"
+		b.Close()
 	}
 }
 
@@ -183,8 +185,16 @@ func (b *Bar) bar() string {
 
 // Render write the progress bar to io.Writer
 func (b *Bar) Render(w io.Writer) int64 {
-	s := fmt.Sprintf("\x1bM\r %s ", b.string())
+	s := fmt.Sprintf("\x1bM\r %s", b.string())
+	//fmt.Print("\033[2K\033[0G")
+	fmt.Print("\x1B7")     // Save the cursor position
+	fmt.Print("\x1B[2K")   // Erase the entire line
+	fmt.Print("\x1B[0J")   // Erase from cursor to end of screen
+	fmt.Print("\x1B[?47h") // Save screen
+	fmt.Print("\x1B[1J")   // Erase from cursor to beginning of screen
+	fmt.Print("\x1B[?47l") // Restore screen
 	io.WriteString(w, s)
+	fmt.Print("\x1B8") // Restore the cursor position util new size is calculated
 	return int64(len(s))
 }
 
