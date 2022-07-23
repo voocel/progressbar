@@ -187,14 +187,14 @@ func (b *Bar) bar() string {
 func (b *Bar) Render(w io.Writer) int64 {
 	s := fmt.Sprintf("\x1bM\r %s", b.string())
 	//fmt.Print("\033[2K\033[0G")
-	fmt.Print("\x1B7")     // Save the cursor position
-	fmt.Print("\x1B[2K")   // Erase the entire line
-	fmt.Print("\x1B[0J")   // Erase from cursor to end of screen
-	fmt.Print("\x1B[?47h") // Save screen
-	fmt.Print("\x1B[1J")   // Erase from cursor to beginning of screen
-	fmt.Print("\x1B[?47l") // Restore screen
+	fmt.Print("\x1B7")     // save the cursor position
+	fmt.Print("\x1B[2K")   // erase the entire line
+	fmt.Print("\x1B[0J")   // erase from cursor to end of screen
+	fmt.Print("\x1B[?47h") // save screen
+	fmt.Print("\x1B[1J")   // erase from cursor to beginning of screen
+	fmt.Print("\x1B[?47l") // restore screen
 	io.WriteString(w, s)
-	fmt.Print("\x1B8") // Restore the cursor position util new size is calculated
+	fmt.Print("\x1B8") // restore the cursor position util new size is calculated
 	return int64(len(s))
 }
 
